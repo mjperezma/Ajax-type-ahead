@@ -1,0 +1,41 @@
+'use strict';
+
+const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
+
+let cities = [];
+
+fetch(endpoint)
+  .then((response) => response.json())
+  .then((data) => cities.push(...data));
+
+function findCities(wordToFind, cities) {
+  return cities.filter((city) => {
+    const regex = new RegExp(wordToFind, 'gi');
+    return city.city.match(regex) || city.state.match(regex);
+  });
+}
+function numberCities(x) {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function displayMatch() {
+  const matchSearch = findCities(this.value, cities);
+  const paintHtml = matchSearch
+    .map((place) => {
+      const regex = new RegExp(this.value, 'gi');
+      const cityName = place.city.replace(regex, `<span class="hl">${this.value}</span>`);
+      const stateName = place.state.replace(regex, `<span class="hl">${this.value}</span>`);
+      return `<li>
+    <span class="name">${cityName}, ${stateName} </span>
+    <span class="population">${numberCities(place.population)} </span>
+    </li>`;
+    })
+    .join('');
+  suggestions.innerHTML = paintHtml;
+}
+
+const searchInput = document.querySelector('.search');
+const suggestions = document.querySelector('.suggestions');
+
+searchInput.addEventListener('change', displayMatch);
+searchInput.addEventListener('keyup', displayMatch);
